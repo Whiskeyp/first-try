@@ -1,2 +1,3 @@
-# first-try
-Let's discover GitHub
+# personnal stuf
+
+Let's make a few ideas there.
