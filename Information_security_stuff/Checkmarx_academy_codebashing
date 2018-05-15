@@ -1,0 +1,102 @@
+# Checkmarx academy
+You can find the following tutorials to the following website : https://academy.checkmark.net
+## Java
+### SQL Injection attack
+SQL Injection is a type of applications security vulnerability whereby a malicious user is able to manipulate the SQL statements that the application sends to the back-end database server for execution. A successful SQL Injection attach exposes the data of the underlying database directly to the attacker.
+
+Because there is no input validation (i.e. no checking of legal characters, minimum/maximum string lengths, or removal of « malicious » characters), the user has the ability to inject raw SQL syntax within the username and password input fields to alter the meaning of the underlying SQL query responsible for authentication, resulting in a bypass of the application’s authentication mechanism.
+```java
+// Bad SQL query :
+String sql = "select * from users where (email ='" + email + "' and password ='" + password + "')";
+
+// Good SQL query :
+String sql = "select * from users where email = ? and password = ? ";
+// Use the .preparedStatement() method to pre compile the SQL query
+// Add the email and password strings
+// Use the .executeQuery() method to execute the authentification query
+```
+**Try the password :  ‘ 1=1)#**
+### XXE Injection
+XML External Entity (XXE) Injection is a type of application security vulnerability whereby a malicious user can attack poorly configured/implemented XML parser within an application. Malicious external entity references can be forced by an attacker, which results in unauthorized read-access to sensitive files on the server that the XML parser runs from. Denial of Service is another potential outcome.
+
+The XML file is processed by the server  side's SAX parser logic. A XXE attacks take advantage of the feature in XML that allow external XML resources (such as a Document Type Definition, DTD) to be loaded within an XML document.
+```xml
+<!-- Example of normal XML file -->
+<?xml version="1.0"?>
+<trades>
+	<metadata>
+		<name>...</name>
+		<stock>...</stock>
+		<units>...</units>
+	</metadata>
+</trades>
+
+<!-- Example of malicious XML file -->
+<!-- Declare that "foo" DTD can contain any combination of parsable data -->
+<!DOCTYPE foo [<!ELEMENT foo ANY >
+<!-- Declare the additional data from the external file named "bar" and with the following URL to be load -->
+<!ENTITY bar SYSTEM "file:///etc/passwd" >]>
+<?xml version="1.0" encoding="UTF-8"?>
+<trades>
+	<metadata>
+		<name>...</name>
+		<stock>
+			<foo>&bar;</foo>
+		</stock>
+		<units>...</units>
+	</metadata>
+</trades>
+```
+It then gives access to the wanted file, "/etc/passwd" in this example, by displaying it in the user interface for example. Because of this vulnerability, any file on the remote server (or more precisely, any file that the web server has access to) could be obtained.
+
+**Safe behavior**
+The right behavior to get is then to configure the SAX parser to disable referencing of external entities.
+```java
+// SAX parser utilisation
+public class TradeDocumentBuilderFactory {
+	public static DocumentBuilderFactory newDocumentBuilderFactory() {
+	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+	try {
+		// Bad SAX parser configuration :
+		documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", true);
+		documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", true);
+		
+		// Good SAX parser configuration :
+		// The following line configure XML parser to not allow DOCTYPE declarations
+		documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+		// However, if DOCTYPE declarations are required by the app, a good alternative is to set the external-...-entities value to false
+		documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+		documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+		}
+		...
+	}
+```
+### Persistent (Stored) XSS
+Persistent Cross-site Scripting (XSS) is an application vulnerability whereby a malicious user tricks a web application into storing attacker-supplied script code which is then later served to unsuspecting user(s) of the application. The attacker-supplied script code runs on the client-side system of other end user(s) of the application. This type of vulnerability is widespread and affects web application that utilize (unvalidated) user-supplied input to generate (unencoded) application output that is served to users.
+
+It can be avoid by correctly escaping the data, when it is served to the user for display in their browser, the browser does not interpret it as code and instead interprets it as data, thus ensuring it does not get executed.
+For example the string: <script> is converted to: &lt;script&gt; when properly escaped and is simply rendered as text in the user's browser window.
+```java
+// Use of the JSP Standard Templating Library (JSTL) to provide standard actions and methods for formatting HTML
+<table>
+	<c:forEach var="contact"itemes="${contacts}">
+		<tr>
+			// Use the Java's expression language (EL) syntax ${} to allow outputting the result of a contact object
+			// Bad code snippet (use of insecured encoding/decoding) :
+			<td>${contact.name}</td>
+			<td>${contact.title}</td>
+			<td>${contact.number}</td>
+			
+			// Good code snippet :
+			// Escape or encode the expression value filled up by the user so that (if it contained HTML formatted data) it won't be loaded and rendered by the browser
+			// Using JSTL's c:out tag or fn:escapeXml() EL function is a good solution
+			<td><c:out value="${contact.name}"/></td>
+			<td><c:out value="${contact.title}"/></td>
+			<td><c:out value="${contact.number}"/></td>
+		</tr>
+	</c:forEach>
+</table>
+```
+## Python
+
+
